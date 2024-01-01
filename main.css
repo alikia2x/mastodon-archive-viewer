@@ -1,0 +1,288 @@
+.status {
+    width: 100%;
+    position: relative;
+    min-height: 128px;
+    border-bottom: 1px solid #5e677e;
+    padding: 1.25rem;
+}
+.post-header {
+    height: 3.5rem;
+    position: relative;
+}
+.post-avatar-box {
+    height: 3rem;
+    width: 3rem;
+    position: absolute;
+}
+.post-avatar {
+    height: 3rem;
+    width: 3rem;
+    border-radius: 0.25rem;
+}
+.post-name {
+    position: absolute;
+    left: 3.6rem;
+    max-width: calc(100% - 3.6rem);
+    white-space:nowrap;
+}
+
+.status__summary {
+    width: 100%;
+}
+.status__summary::after {
+    display: block;
+}
+.post-content-box {
+}
+
+.cw-btn {
+    background-color: rgba(0, 0, 0, 0);
+    color: white;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+
+.post-display-name{
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+}
+.status__date {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+        "Open Sans", "Helvetica Neue", sans-serif;
+    color: rgb(175, 185, 216);
+    max-width: 20rem;
+    text-align: left;
+    position: relative;
+}
+
+.status__video{
+    width: 100% !important;
+    height: auto !important;
+    cursor: pointer;
+}
+
+.status__media {
+    width: 100%;
+    height: 25vh;
+    min-height: 200px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    cursor: zoom-in;
+}
+.post-media-box {
+    display: grid;
+    grid-template-columns: repeat(2, 50%);
+    grid-gap: 10px;
+}
+.post-media-box > .status__media:nth-child(1):nth-last-child(1) {
+    grid-column: span 2;
+    height: 50vh;
+    min-height: 350px;
+}
+
+.post-media-box > .status__media:nth-child(1):nth-last-child(2),
+.post-media-box > .status__media:nth-child(2):nth-last-child(1) {
+    grid-column: span 1;
+    height: 50vh;
+    min-height: 350px;
+}
+
+.full-img {
+    position: absolute;
+    max-width: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    height: auto;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+#img-cover {
+    overflow-y: auto;
+    width: 100vw;
+    height: 100vh;
+    z-index: 5;
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.img-cover-close {
+    position: fixed;
+    top: 2rem;
+    right: 20%;
+    font-size: 3rem;
+    line-height: 3rem;
+    font-family: sans-serif;
+    cursor: pointer;
+    user-select: none;
+}
+
+.post-media-box > .status__media:nth-child(1):nth-last-child(3),
+.post-media-box > .status__media:nth-child(2):nth-last-child(2),
+.post-media-box > .status__media:nth-child(3):nth-last-child(1) {
+    grid-column: span 1;
+}
+
+.post-media-box > .status__media:nth-child(1):nth-last-child(4),
+.post-media-box > .status__media:nth-child(2):nth-last-child(3),
+.post-media-box > .status__media:nth-child(3):nth-last-child(2),
+.post-media-box > .status__media:nth-child(4):nth-last-child(1) {
+    grid-column: span 1;
+}
+
+.status__image {
+    max-width: 100%;
+    width: 100%;
+    min-width: 100%;
+}
+.hidden {
+    display: none;
+}
+.header-img {
+    object-fit: cover;
+    width: 100%;
+}
+#header-bar {
+    width: auto;
+    margin-top: -3.5rem;
+    position: relative;
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
+.avatar {
+    height: 7rem;
+    width: 7rem;
+    left: 0;
+    position: relative;
+    border-radius: 0.5rem;
+}
+.avatar-box {
+    position: relative;
+    width: 100%;
+    height: auto;
+}
+#help-text {
+    padding: 24px;
+    text-align: center;
+    font-size: 1.1em;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+        "Open Sans", "Helvetica Neue", sans-serif;
+}
+#error-text {
+    background: rgba(100, 0, 0, 0.75);
+}
+#user-name {
+    line-height: 2.5rem;
+    font-size: 2rem;
+    margin: 0;
+    margin-top: 1rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+        "Open Sans", "Helvetica Neue", sans-serif;
+    font-weight: 300;
+}
+#mastodon-name {
+    color: rgb(122, 131, 158);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+        "Open Sans", "Helvetica Neue", sans-serif;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+#bio {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+        "Open Sans", "Helvetica Neue", sans-serif;
+    font-size: 0.9rem;
+}
+#header-img-box {
+    overflow: hidden;
+}
+body {
+    font-size: 1rem;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    background: #191b22;
+    color: #fff1e8;
+    line-height: 1.4;
+}
+* {
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+a {
+    color: #8c8dff;
+}
+.filter-btn {
+    background-color: rgba(0, 0, 0, 0);
+    color: white;
+    border: none;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+    margin-left: 0.3rem;
+}
+#settings-bar {
+    width: auto;
+    position: relative;
+    padding: 1rem 1rem;
+    height: auto;
+    font-size: 0.9rem;
+}
+#articles {
+    border-top: 2px solid #646e84;
+}
+.original-url{
+    margin-top: 1rem;
+    color: rgb(137, 146, 174);
+}
+.app {
+    position: absolute;
+    width: 40%;
+    left: 30%;
+    background-color: #282c37;
+}
+@media screen and (max-width: 1500px) {
+    .app {
+        width: 50%;
+        left: 25%;
+    }
+}
+@media screen and (max-width: 768px) {
+    .app {
+        width: 80%;
+        left: 10%;
+    }
+}
+@media screen and (max-width: 576px) {
+    .app {
+        width: 100%;
+        left: 0;
+    }
+    #header-bar {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    .status__media {
+        height: 200px;
+    }
+    .full-img {
+        position: absolute;
+        max-width: 95%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        height: auto;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        top: 50%;
+    }
+    .img-cover-close {
+        top: 0.5rem;
+        right: 5%;
+    }
+    .post-name{
+        left: 3.6rem;
+    }
+}

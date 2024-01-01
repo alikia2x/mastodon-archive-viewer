@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mastodon Archive</title>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="main.css" />
+        <template id="article">
+            <article class="status">
+                <div class="post-header">
+                    <div class="post-avatar-box">
+                        <img class="post-avatar" src="avatar.png" />
+                    </div>
+                    <div class="post-name">
+                        <div class="post-display-name"></div>
+                        <div class="post-mastodon-name"></div>
+                    </div>
+                </div>
+                <div class="status__date"></div>
+                <div><a class="original-url"></a></div>
+                <div class="post-content-box">
+                    <div class="status__content"></div>
+                    <div class="post-media-box"></div>
+                </div>
+            </article>
+        </template>
+        <template id="article--CW">
+            <article class="status">
+                <div class="post-header">
+                    <div class="post-avatar-box">
+                        <img class="post-avatar" src="avatar.png" />
+                    </div>
+                    <div class="post-name">
+                        <div class="post-display-name"></div>
+                        <div class="post-mastodon-name"></div>
+                    </div>
+                </div>
+                <div class="status__date"></div>
+                <div><a class="original-url"></a></div>
+                <div class="post-content-box">
+                    <p><summary class="status__summary"></summary></p>
+                    <button
+                        class="cw-btn"
+                        show="false"
+                        onclick="
+                        if(this.getAttribute('show')=='false')this.setAttribute('show',true);
+                        else this.setAttribute('show',false);
+                        this.innerText = this.getAttribute('show')=='true'?'收起警告内容':'展开警告内容';
+                        this.parentNode.querySelector('.status__content').classList.toggle('hidden');
+                        "
+                    >
+                        展开警告内容
+                    </button>
+                    <div class="status__content hidden"></div>
+                    <div class="post-media-box"></div>
+                </div>
+            </article>
+        </template>
+        <template id="media-video">
+            <video controls muted src="" class="status__media status__video" loading="lazy"></video>
+        </template>
+        <template id="media-image">
+            <img
+                class="status__media"
+                src=""
+                loading="lazy"
+                onclick="
+                var ifull=document.createElement('img');
+                ifull.src=this.src;
+                ifull.classList.add('full-img');
+                var img_cover=document.createElement('div');
+                var img_cover_close=document.createElement('div');
+               img_cover.onclick=function(){document.getElementById('img-cover').parentNode.removeChild(document.getElementById('img-cover'))};
+                img_cover.id='img-cover';
+                img_cover.appendChild(img_cover_close);
+                img_cover.appendChild(ifull);
+                document.body.appendChild(img_cover);
+            "
+            />
+        </template>
+    </head>
+    <body>
+        <div class="app">
+            <section id="header">
+                <div id="header-img-box">
+                    <img src="header.png" class="header-img" />
+                </div>
+                <div id="header-bar">
+                    <div class="avatar-box">
+                        <img src="avatar.png" class="avatar" />
+                    </div>
+                    <h2 id="user-name"></h2>
+                    <span id="mastodon-name"></span>
+                    <div id="bio"></div>
+                </div>
+            </section>
+            <div id="help-text">
+                <h1>正在处理你的归档……</h1>
+            </div>
+            <script>
+                var order = 1;
+                var showReply = false;
+                var showMedia = 4;
+            </script>
+            <div id="main-content">
+                <div id="settings-bar">
+                    <span>当前过滤器状态:</span>
+                    <button
+                        onclick="
+                            if(order == 0) {
+                                order = 1;
+                                this.innerText = '按时间倒序';
+                            }
+                            else {
+                                order = 0
+                                this.innerText = '按时间正序';
+                            }
+                            buildArchiveView(outbox_g, order=order, showReply=showReply, showMedia=showMedia);
+                        "
+                        id="order-btn"
+                        class="filter-btn"
+                    >
+                        按时间倒序
+                    </button>
+                    <button
+                        onclick="
+                            if(showReply == false) {
+                                showReply = true;
+                                this.innerText = '展示评论';
+                            }
+                            else {
+                                showReply = false;
+                                this.innerText = '不展示评论';
+                            }
+                            buildArchiveView(outbox_g, order=order, showReply=showReply, showMedia=showMedia);
+                        "
+                        id="reply-btn"
+                        class="filter-btn"
+                    >
+                        不展示评论
+                    </button>
+                    <button
+                        onclick="
+                            const text=['不展示媒体', '只展示图片', '只展示视频', '只展示媒体', '展示所有嘟文'];
+                            showMedia = showMedia+1 < 5 ? showMedia+1 : 0;
+                            this.innerText = text[showMedia];
+                            buildArchiveView(outbox_g, order=order, showReply=showReply, showMedia=showMedia);
+                        "
+                        id="reply-btn"
+                        class="filter-btn"
+                    >
+                        展示所有嘟文
+                    </button>
+                    <p id="total"></p>
+                    <span>快捷跳转：</span><br />
+                    <select
+                        id="year"
+                        style="
+                            appearance: none;
+                            border: none;
+                            color: #fff;
+                            background-color: rgba(0, 0, 0, 0);
+                            padding: 0rem 0.2rem;
+                            text-decoration: underline;
+                        "
+                    ></select>
+                    <select
+                        id="month"
+                        style="
+                            appearance: none;
+                            border: none;
+                            color: #fff;
+                            background-color: rgba(0, 0, 0, 0);
+                            padding: 0rem 0.2rem;
+                            text-decoration: underline;
+                        "
+                    ></select>
+                    <button
+                        style="
+                            background-color: rgba(0, 0, 0, 0);
+                            color: white;
+                            border: none;
+                            cursor: pointer;
+                            text-decoration: underline;
+                            padding: 0;
+                            margin-left: 1rem;
+                        "
+                        onclick="scrollToArticleByDate(document.getElementById('month').value, document.getElementById('year').value)"
+                    >
+                        跳转
+                    </button>
+                </div>
+                <main id="articles"></main>
+            </div>
+        </div>
+    </body>
+    <script>
+        var yearSelect = document.getElementById("year");
+        var monthSelect = document.getElementById("month");
+        function getYearMonthRange() {
+            const articles = document.getElementById("articles").children;
+            if (articles.length === 0) return null;
+            const firstArticleDate = getDateFromArticle(articles[0]);
+            const lastArticleDate = getDateFromArticle(articles[articles.length - 1]);
+            const startYear = firstArticleDate.getFullYear();
+            const startMonth = firstArticleDate.getMonth() + 1;
+            const endYear = lastArticleDate.getFullYear();
+            const endMonth = lastArticleDate.getMonth() + 1;
+            return startYear > endYear || (startYear === endYear && startMonth > endMonth)
+                ? [endYear, endMonth, startYear, startMonth]
+                : [startYear, startMonth, endYear, endMonth];
+        }
+        function scrollToArticleByDate(month, year) {
+            var articles = Array.from(document.getElementById("articles").children);
+            for (var i = 0; i < articles.length; i++) {
+                var dateElement = articles[i].querySelector(".status__date");
+                if (dateElement) {
+                    var articleDate = new Date(dateElement.innerText);
+                    if (articleDate.getMonth() + 1 == month && articleDate.getFullYear() == year) {
+                        articles[i].scrollIntoView({ behavior: "smooth", block: "start" });
+                        break;
+                    }
+                }
+            }
+        }
+
+        function getDateFromArticle(article) {
+            var dateElement = article.querySelector(".status__date");
+            if (dateElement) {
+                var dateText = dateElement.innerText;
+                return new Date(dateText);
+            }
+            return null;
+        }
+
+        function convertMastodonUrl(inputUrl) {
+            const match = inputUrl.match(/https:\/\/([^\/]+)\/@([^\/]+)/);
+            if (match && match.length === 3) {
+                return `@${match[2]}@${match[1]}`;
+            } else {
+                return inputUrl;
+            }
+        }
+        // 设置select元素的值
+        function setSelectValues(range) {
+            if (range) {
+                for (var i = range[0]; i <= range[2]; i++) {
+                    var option = document.createElement("option");
+                    option.value = i;
+                    option.text = i+"年";
+                    yearSelect.add(option);
+                }
+
+                for (var j = 1; j <= 12; j++) {
+                    var option = document.createElement("option");
+                    option.value = j;
+                    option.text = j+"月";
+                    monthSelect.add(option);
+                }
+
+                yearSelect.value = range[0];
+                monthSelect.value = range[1];
+            }
+        }
+    </script>
+    <script>
+        ("use strict");
+        var outboxXHR = new XMLHttpRequest(),
+            actorXHR = new XMLHttpRequest();
+
+        var outbox_g = {};
+        var mas_name = "";
+        var display_name = "";
+
+        actorXHR.addEventListener("load", function () {
+            if (this.status != 200) {
+                document.getElementById(
+                    "help-text"
+                ).innerHTML = `<h1>⚠️</h1><h2>出错了，请稍后再试</h2><span>错误代码：${this.status}</span>`;
+            }
+            var actor = JSON.parse(this.response);
+            document.getElementById("bio").innerHTML = actor.summary;
+            document.getElementById("mastodon-name").innerText = convertMastodonUrl(actor.url);
+            mas_name = convertMastodonUrl(actor.url);
+            document.getElementById("user-name").insertAdjacentText("afterbegin", actor.name);
+            display_name = actor.name;
+            outboxXHR.send();
+        });
+        actorXHR.open("GET", "./actor.json");
+        actorXHR.overrideMimeType("text/json; charset=utf-8");
+        actorXHR.send();
+
+        outboxXHR.addEventListener("load", function () {
+            var outbox = JSON.parse(this.response);
+            outbox_g = outbox;
+            buildArchiveView(outbox);
+            document.getElementById("help-text").classList.toggle("hidden");
+            var range = getYearMonthRange();
+            setSelectValues(range);
+        });
+        outboxXHR.open("GET", "./outbox.json");
+        outboxXHR.overrideMimeType("text/json; charset=utf-8");
+
+        /**
+         * 构建归档视图
+         * @param {Object} outbox - 归档数据
+         * @param {number} order - 排序方式，0表示正序，1表示倒序
+         * @param {boolean} showReply - 是否显示回复
+         * @param {number} showMedia - 是否显示附件, 0表示只显示不包含附件的帖子，
+         * 1表示只显示图片，2表示只显示视频，3表示只显示视频和图片，4表示所有（默认）
+         * @param {boolean} showBoosts - 是否显示转发
+         */
+        function buildArchiveView(outbox, order = 1, showReply = false, showMedia = 4) {
+            document.getElementById("articles").innerHTML = "";
+            // 获取模板
+            var articleTemplate = document.getElementById("article");
+            var articleCWTemplate = document.getElementById("article--CW");
+            var videoTemplate = document.getElementById("media-video");
+            var imageTemplate = document.getElementById("media-image");
+
+            // 获取归档数据中的状态对象
+            var statuses = outbox.orderedItems
+                .map((item) => item.object)
+                .filter((object) => typeof object === typeof {});
+
+            let numOfPosts = statuses.length;
+
+            // 过滤回复
+            statuses = statuses
+                .filter((status) => showReply || !status.inReplyTo)
+                .filter((status) => showReply || status.cc.length <= 1);
+
+            // 根据选定的附件展示选项过滤
+            // 如果status.attachment[0]存在且status.attachment[0].mediaType包含image,则判断为图像
+            // 如果status.attachment[0]存在且status.attachment[0].mediaType包含video,则判断为视频
+            // 当showMedia == 4时，不过滤
+            // 当showMedia == 3时，过滤掉status.attachment[0]不存在的情况
+            // 当showMedia == 2时，过滤掉status.attachment[0]存在且status.attachment[0].mediaType包含image的情况
+            // 当showMedia == 1时，过滤掉status.attachment[0]存在且status.attachment[0].mediaType包含video的情况
+            // 当showMedia == 0时，过滤掉status.attachment[0]存在的情况
+            if (showMedia == 3) {
+                statuses = statuses.filter((status) => status.attachment[0]);
+            } else if (showMedia == 2) {
+                statuses = statuses.filter(
+                    (status) => status.attachment[0] && status.attachment[0].mediaType.includes("video")
+                );
+            } else if (showMedia == 1) {
+                statuses = statuses.filter(
+                    (status) => status.attachment[0] && status.attachment[0].mediaType.includes("image")
+                );
+            } else if (showMedia == 0) {
+                statuses = statuses.filter((status) => !status.attachment[0]);
+            }
+
+            // 根据排序方式进行倒序
+            if (order == "1") {
+                statuses.reverse();
+            }
+
+            document.getElementById(
+                "total"
+            ).innerHTML = `<p>归档中共有${numOfPosts}个帖子<br>过滤后共有${statuses.length}个帖子<br><span>过滤器从左至右生效。</span></p>`;
+
+            // 遍历状态对象
+            statuses.forEach((status) => {
+                // 获取附件的URL列表
+                var attachmentUrls = status.attachment.map((media) => media.url);
+
+                // 根据是否有摘要选择不同的文章模板
+                var article;
+                if (status.summary) {
+                    article = document.importNode(articleCWTemplate.content, true);
+                    article.querySelector(".status__summary").insertAdjacentText("afterbegin", status.summary);
+                } else {
+                    article = document.importNode(articleTemplate.content, true);
+                }
+
+                // 根据status.published获取本地日期字符串及发布的年份、月份
+                var date = new Date(status.published);
+                var year = date.getFullYear();
+                var month = date.getMonth();
+                var timeString = date.toLocaleString();
+                // 插入日期
+                article.querySelector(".status__date").innerText = timeString;
+
+                // 插入内容
+                postDiv = document.createElement("div");
+                postDiv.innerHTML = status.content;
+                postDiv.setAttribute("isReply", status.inReplyTo != null);
+                article.querySelector(".status__content").appendChild(postDiv);
+
+                // 插入原始链接
+                article.querySelector(".original-url").href = status.id;
+                article.querySelector(".original-url").innerText = "原始嘟文";
+
+                // 如果有附件，则插入到文章中
+                if (attachmentUrls.length > 0) {
+                    var mediaDiv = article.querySelector(".post-media-box");
+                    attachmentUrls.forEach((url) => {
+                        var extension = url.split(".").pop();
+                        var media;
+                        if (extension === "mp4") {
+                            media = document.importNode(videoTemplate.content, true);
+                        } else {
+                            media = document.importNode(imageTemplate.content, true);
+                        }
+                        media.querySelector(".status__media").src = url.split("/media/").pop();
+                        mediaDiv.appendChild(media);
+                    });
+                }
+                article.querySelector(".post-display-name").innerText = display_name;
+                article.querySelector(".post-mastodon-name").innerText = mas_name;
+
+                // 将文章插入到页面中
+                document.getElementById("articles").appendChild(article);
+            });
+        }
+    </script>
+</html>
