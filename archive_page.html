@@ -9,7 +9,7 @@
             <article class="status">
                 <div class="post-header">
                     <div class="post-avatar-box">
-                        <img class="post-avatar" src="avatar.png" />
+                        <img class="post-avatar" />
                     </div>
                     <div class="post-name">
                         <div class="post-display-name"></div>
@@ -28,7 +28,7 @@
             <article class="status">
                 <div class="post-header">
                     <div class="post-avatar-box">
-                        <img class="post-avatar" src="avatar.png" />
+                        <img class="post-avatar" />
                     </div>
                     <div class="post-name">
                         <div class="post-display-name"></div>
@@ -83,11 +83,11 @@
         <div class="app">
             <section id="header">
                 <div id="header-img-box">
-                    <img src="header.png" class="header-img" />
+                    <img class="header-img" />
                 </div>
                 <div id="header-bar">
                     <div class="avatar-box">
-                        <img src="avatar.png" class="avatar" />
+                        <img class="avatar" />
                     </div>
                     <h2 id="user-name"></h2>
                     <span id="mastodon-name"></span>
@@ -247,14 +247,14 @@
                 for (var i = range[0]; i <= range[2]; i++) {
                     var option = document.createElement("option");
                     option.value = i;
-                    option.text = i+"年";
+                    option.text = i + "年";
                     yearSelect.add(option);
                 }
 
                 for (var j = 1; j <= 12; j++) {
                     var option = document.createElement("option");
                     option.value = j;
-                    option.text = j+"月";
+                    option.text = j + "月";
                     monthSelect.add(option);
                 }
 
@@ -271,6 +271,7 @@
         var outbox_g = {};
         var mas_name = "";
         var display_name = "";
+        var actor = {};
 
         actorXHR.addEventListener("load", function () {
             if (this.status != 200) {
@@ -278,11 +279,13 @@
                     "help-text"
                 ).innerHTML = `<h1>⚠️</h1><h2>出错了，请稍后再试</h2><span>错误代码：${this.status}</span>`;
             }
-            var actor = JSON.parse(this.response);
+            actor = JSON.parse(this.response);
             document.getElementById("bio").innerHTML = actor.summary;
             document.getElementById("mastodon-name").innerText = convertMastodonUrl(actor.url);
             mas_name = convertMastodonUrl(actor.url);
             document.getElementById("user-name").insertAdjacentText("afterbegin", actor.name);
+            document.querySelector(".header-img").src = actor.image.url;
+            document.querySelector(".avatar").src = actor.icon.url;
             display_name = actor.name;
             outboxXHR.send();
         });
@@ -410,6 +413,7 @@
                 }
                 article.querySelector(".post-display-name").innerText = display_name;
                 article.querySelector(".post-mastodon-name").innerText = mas_name;
+                article.querySelector(".post-avatar").src = actor.icon.url;
 
                 // 将文章插入到页面中
                 document.getElementById("articles").appendChild(article);
